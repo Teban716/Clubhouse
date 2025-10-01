@@ -1,18 +1,19 @@
 <script lang="ts">
-  import { authUser } from './stores/authStore';
-  import { isAuthModalOpen } from './stores/uiStore';
+  import { authStore } from './stores/authStore';
   import { auth } from './firebase';
   import { signOut } from 'firebase/auth';
+
+  export let onOpenModal: () => void;
 </script>
 
 <nav>
   <div class="brand">Clubhouse Caps</div>
   <div class="auth-links">
-    {#if $authUser}
-      <span class="user-name">{$authUser.displayName || $authUser.email}</span>
+    {#if $authStore.currentUser}
+      <span class="user-name">{$authStore.currentUser.displayName || $authStore.currentUser.email}</span>
       <button on:click={() => signOut(auth)}>Cerrar sesión</button>
     {:else}
-      <button on:click={() => isAuthModalOpen.set(true)}>Iniciar sesión</button>
+      <button on:click={onOpenModal}>Iniciar sesión</button>
     {/if}
   </div>
 </nav>

@@ -1,74 +1,53 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { auth } from './lib/firebase';
-  import { onAuthStateChanged } from 'firebase/auth';
-  import { authUser } from './lib/stores/authStore';
-
   import Navbar from './lib/Navbar.svelte';
-  import ProductCard from './lib/ProductCard.svelte';
-  import Footer from './lib/Footer.svelte';
   import AuthModal from './lib/AuthModal.svelte';
+  import AdminDashboard from "./lib/components/AdminDashboard.svelte";
+  import ProductList from "./lib/components/ProductList.svelte";
+  import { authStore } from './lib/stores/authStore';
 
-  const products = [
-    {
-      name: 'Gorra Negra',
-      price: '$25',
-      image: 'https://via.placeholder.com/300x300.png?text=Gorra+Negra',
-    },
-    {
-      name: 'Gorra Blanca',
-      price: '$25',
-      image: 'https://via.placeholder.com/300x300.png?text=Gorra+Blanca',
-    },
-    {
-      name: 'Gorra Roja',
-      price: '$25',
-      image: 'https://via.placeholder.com/300x300.png?text=Gorra+Roja',
-    },
-    {
-      name: 'Gorra Azul',
-      price: '$25',
-      image: 'https://via.placeholder.com/300x300.png?text=Gorra+Azul',
-    },
-    {
-      name: 'Gorra Verde',
-      price: '$25',
-      image: 'https://via.placeholder.com/300x300.png?text=Gorra+Verde',
-    },
-    {
-      name: 'Gorra Amarilla',
-      price: '$25',
-      image: 'https://via.placeholder.com/300x300.png?text=Gorra+Amarilla',
-    },
-  ];
+  let isModalVisible = false;
 
-  onMount(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      authUser.set(user);
-    });
-    return unsubscribe;
-  });
+  function openModal() {
+    isModalVisible = true;
+  }
+
+  function closeModal() {
+    isModalVisible = false;
+  }
 </script>
 
+<Navbar onOpenModal={openModal} />
+<AuthModal isOpen={isModalVisible} onClose={closeModal} />
+
 <main>
-  <Navbar />
-  <AuthModal />
-  <div class="product-grid">
-    {#each products as product}
-      <ProductCard {product} />
-    {/each}
-  </div>
-  <Footer />
+  {#if $authStore.isLoading}
+    <div class="centered-message">
+      <p>Cargando aplicación...</p>
+    </div>
+  {:else}
+    {#if $authStore.isAdmin}
+      <AdminDashboard />
+    {/if}
+    <ProductList />
+  {/if}
 </main>
 
 <style>
-  main {
-    padding-bottom: 5rem; /* Space for the footer */
+  :global(body) {
+    font-family: 'Inter', sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+    margin: 0;
   }
-  .product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
+
+  main {
     padding: 1rem;
+  }
+
+  .centered-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
   }
 </style>

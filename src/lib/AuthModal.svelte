@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { isAuthModalOpen } from './stores/uiStore';
-  import { authUser } from './stores/authStore';
   import { auth, db } from './firebase';
   import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
   import { doc, setDoc } from "firebase/firestore";
   import { onMount, onDestroy } from 'svelte';
+
+  export let isOpen: boolean;
+  export let onClose: () => void;
 
   let email = '';
   let password = '';
@@ -26,13 +27,9 @@
     error = null;
   }
 
-  function closeModal() {
-    isAuthModalOpen.set(false);
-  }
-
   function handleKeydown(e: KeyboardEvent) {
-    if ($isAuthModalOpen && e.key === 'Escape') {
-      closeModal();
+    if (isOpen && e.key === 'Escape') {
+      onClose();
     }
   }
 
@@ -60,9 +57,6 @@
         const user = userCredential.user;
 
         await updateProfile(user, { displayName: `${name} ${lastName}` });
-        
-        await user.reload();
-        authUser.set(auth.currentUser);
 
         await setDoc(doc(db, "users", user.uid), {
           name,
@@ -72,7 +66,7 @@
       }
       
       resetForm();
-      closeModal();
+      onClose();
 
     } catch (e: any) {
       if (e.code === 'auth/email-already-in-use') {
@@ -84,10 +78,8 @@
   }
 </script>
 
-{#if $isAuthModalOpen}
-  <!-- svelte-ignore a11y-no-static-element-interactions, a11y-click-events-have-key-events -->
-  <div class="modal-backdrop" on:click={closeModal}>
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
+{#if isOpen}
+  <div class="modal-backdrop" on:click={onClose}>
     <div 
       class="modal-content" 
       on:click|stopPropagation 
@@ -96,7 +88,7 @@
       aria-labelledby="modal-title"
       tabindex="-1"
     >
-      <button class="close-button" on:click={closeModal}>&times;</button>
+      <button class="close-button" on:click={onClose}>&times;</button>
       <h2 id="modal-title">{isLogin ? 'Iniciar sesión' : 'Registrarse'}</h2>
       <form on:submit|preventDefault={handleSubmit}>
         {#if !isLogin}
@@ -219,15 +211,12 @@
   }
 
   .toggle-link {
-    /* Reset button styles */
     background: none;
     border: none;
     padding: 0;
     width: auto;
     font-family: inherit;
     font-size: inherit;
-
-    /* Original link styles */
     color: #00FFFF;
     cursor: pointer;
     font-weight: 600;
@@ -236,7 +225,7 @@
 
   .toggle-link:hover {
     color: #00e0e0;
-    box-shadow: none; /* Remove main button hover effect */
+    box-shadow: none; 
   }
 
   .error {
