@@ -1,47 +1,74 @@
-<script>
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { auth } from './lib/firebase';
+  import { onAuthStateChanged } from 'firebase/auth';
+  import { authUser } from './lib/stores/authStore';
+
+  import Navbar from './lib/Navbar.svelte';
+  import ProductCard from './lib/ProductCard.svelte';
+  import Footer from './lib/Footer.svelte';
+  import AuthModal from './lib/AuthModal.svelte';
+
+  const products = [
+    {
+      name: 'Gorra Negra',
+      price: '$25',
+      image: 'https://via.placeholder.com/300x300.png?text=Gorra+Negra',
+    },
+    {
+      name: 'Gorra Blanca',
+      price: '$25',
+      image: 'https://via.placeholder.com/300x300.png?text=Gorra+Blanca',
+    },
+    {
+      name: 'Gorra Roja',
+      price: '$25',
+      image: 'https://via.placeholder.com/300x300.png?text=Gorra+Roja',
+    },
+    {
+      name: 'Gorra Azul',
+      price: '$25',
+      image: 'https://via.placeholder.com/300x300.png?text=Gorra+Azul',
+    },
+    {
+      name: 'Gorra Verde',
+      price: '$25',
+      image: 'https://via.placeholder.com/300x300.png?text=Gorra+Verde',
+    },
+    {
+      name: 'Gorra Amarilla',
+      price: '$25',
+      image: 'https://via.placeholder.com/300x300.png?text=Gorra+Amarilla',
+    },
+  ];
+
+  onMount(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      authUser.set(user);
+    });
+    return unsubscribe;
+  });
 </script>
 
 <main>
-  <div>
-    <a href="https://vite.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
+  <Navbar />
+  <AuthModal />
+  <div class="product-grid">
+    {#each products as product}
+      <ProductCard {product} />
+    {/each}
   </div>
-  <h1>Vite + Svelte</h1>
-
-  <div class="card">
-    <Counter />
-  </div>
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
+  <Footer />
 </main>
 
 <style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
+  main {
+    padding-bottom: 5rem; /* Space for the footer */
   }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
   }
 </style>

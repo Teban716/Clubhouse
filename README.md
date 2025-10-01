@@ -1,43 +1,45 @@
-# Svelte + Vite
+# Blueprint: Tienda de Gorras
 
-This template should help get you started developing with Svelte in Vite.
+## Visión General
 
-## Recommended IDE Setup
+Crear una tienda en línea visualmente atractiva para mostrar una colección de gorras. La aplicación contará con un diseño elegante y sofisticado que transmite una sensación de primera calidad y ofrecerá un sistema de autenticación de usuarios seguro, personalizado y fácil de usar.
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+## Diseño y Estilo
 
-## Need an official Svelte framework?
+*   **Logo:** Se utilizará el logo de "Clubhouse Caps" con el cohete.
+*   **Paleta de Colores:** Se utilizará una paleta de colores refinada sobre un fondo de modo oscuro, utilizando los colores del logo de una manera más sutil.
+*   **Tipografía:** Se utilizará "Poppins" de Google Fonts para una apariencia limpia y moderna.
+*   **Diseño:** Se utilizarán sombras suaves y profundas para crear una sensación de profundidad.
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+## Funcionalidades
 
-## Technical considerations
+### Autenticación y Perfiles de Usuario (Firebase)
 
-**Why use this over SvelteKit?**
+*   **Integración:** Se utilizará Firebase Authentication para gestionar el registro e inicio de sesión y Cloud Firestore para almacenar datos adicionales del perfil.
+*   **Datos de Registro:** El formulario de registro solicitará:
+    *   Nombre y Apellidos (se almacenarán en el `displayName` del perfil de Firebase Auth).
+    *   Celular (se almacenará en una colección `users` en Firestore).
+    *   Email y Contraseña.
+    *   **Confirmación de Contraseña.**
+*   **Validación y Manejo de Errores:**
+    *   Se validará que las contraseñas coincidan antes de enviar el formulario de registro.
+    *   Se mostrará un mensaje de error específico si el correo electrónico ya está en uso (`El usuario ya está registrado`).
+*   **Interfaz de Usuario:**
+    *   Se creará una ventana modal para los formularios de "Iniciar sesión" y "Registrarse".
+    *   **El modal tendrá un botón de cierre (X) en la esquina superior derecha.**
+    *   La barra de navegación mostrará un botón "Iniciar sesión" que abrirá el modal.
+    *   Una vez que el usuario inicie sesión, la barra mostrará su **nombre** (`displayName`) y un botón para "Cerrar sesión".
+*   **Gestión de Estado:** Se utilizará un Svelte Store (`authStore`) para gestionar el estado de autenticación del usuario de forma reactiva en toda la aplicación.
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+## Plan de Implementación
 
-This template contains as little as possible to get started with Vite + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+### 1. Estructura del Proyecto
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+*   Se instalará la dependencia de `firebase` (que ya incluye Firestore).
+*   Se actualizará el archivo de configuración `src/lib/firebase.ts` para inicializar Firestore.
+*   Se actualizará el componente `src/lib/AuthModal.svelte` para incluir la confirmación de contraseña, el manejo de errores mejorado y el botón de cierre.
+*   Se actualizará el componente `src/lib/Navbar.svelte` para mostrar el `displayName`.
 
-**Why include `.vscode/extensions.json`?**
+### 2. Estilo y Diseño
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `checkJs` in the JS template?**
-
-It is likely that most cases of changing variable types in runtime are likely to be accidental, rather than deliberate. This provides advanced typechecking out of the box. Should you like to take advantage of the dynamically-typed nature of JavaScript, it is trivial to change the configuration.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/sveltejs/svelte-hmr/tree/master/packages/svelte-hmr#preservation-of-local-state).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```js
-// store.js
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
-```
+*   Se adaptará el modal de autenticación para los nuevos campos y el botón de cierre.
