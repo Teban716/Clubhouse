@@ -4,6 +4,7 @@
   import { auth, db } from './firebase';
   import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
   import { doc, setDoc } from "firebase/firestore";
+  import { onMount, onDestroy } from 'svelte';
 
   let email = '';
   let password = '';
@@ -25,6 +26,24 @@
     error = null;
   }
 
+  function closeModal() {
+    isAuthModalOpen.set(false);
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if ($isAuthModalOpen && e.key === 'Escape') {
+      closeModal();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeydown);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('keydown', handleKeydown);
+  });
+
   async function handleSubmit() {
     error = null;
 
@@ -42,10 +61,7 @@
 
         await updateProfile(user, { displayName: `${name} ${lastName}` });
         
-        // Forzar la recarga de los datos del usuario para obtener el displayName
         await user.reload();
-
-        // Actualizar el store con el usuario actualizado
         authUser.set(auth.currentUser);
 
         await setDoc(doc(db, "users", user.uid), {
@@ -56,7 +72,7 @@
       }
       
       resetForm();
-      isAuthModalOpen.set(false);
+      closeModal();
 
     } catch (e: any) {
       if (e.code === 'auth/email-already-in-use') {
@@ -69,10 +85,19 @@
 </script>
 
 {#if $isAuthModalOpen}
-  <div class="modal-backdrop" on:click={() => isAuthModalOpen.set(false)}>
-    <div class="modal-content" on:click|stopPropagation>
-      <button class="close-button" on:click={() => isAuthModalOpen.set(false)}>&times;</button>
-      <h2>{isLogin ? 'Iniciar sesión' : 'Registrarse'}</h2>
+  <!-- svelte-ignore a11y-no-static-element-interactions, a11y-click-events-have-key-events -->
+  <div class="modal-backdrop" on:click={closeModal}>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div 
+      class="modal-content" 
+      on:click|stopPropagation 
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      tabindex="-1"
+    >
+      <button class="close-button" on:click={closeModal}>&times;</button>
+      <h2 id="modal-title">{isLogin ? 'Iniciar sesión' : 'Registrarse'}</h2>
       <form on:submit|preventDefault={handleSubmit}>
         {#if !isLogin}
           <input type="text" bind:value={name} placeholder="Nombre" required />
@@ -93,17 +118,16 @@
       <p class="toggle-auth-text">
         {#if isLogin}
           ¿No tienes una cuenta?
-          <span class="toggle-link" on:click={() => { isLogin = false; error = null; }}>
+          <button type="button" class="toggle-link" on:click={() => { isLogin = false; error = null; }}>
             Regístrate
-          </span>
+          </button>
         {:else}
           ¿Ya tienes una cuenta?
-          <span class="toggle-link" on:click={() => { isLogin = true; error = null; }}>
+          <button type="button" class="toggle-link" on:click={() => { isLogin = true; error = null; }}>
             Inicia sesión
-          </span>
+          </button>
         {/if}
       </p>
-
     </div>
   </div>
 {/if}
@@ -131,6 +155,10 @@
     width: 90%;
     max-width: 400px;
     text-align: center;
+  }
+  
+  .modal-content:focus {
+    outline: none;
   }
 
   .close-button {
@@ -191,6 +219,15 @@
   }
 
   .toggle-link {
+    /* Reset button styles */
+    background: none;
+    border: none;
+    padding: 0;
+    width: auto;
+    font-family: inherit;
+    font-size: inherit;
+
+    /* Original link styles */
     color: #00FFFF;
     cursor: pointer;
     font-weight: 600;
@@ -198,7 +235,8 @@
   }
 
   .toggle-link:hover {
-    color: #00e0e0; /* A slightly lighter shade for hover effect */
+    color: #00e0e0;
+    box-shadow: none; /* Remove main button hover effect */
   }
 
   .error {
